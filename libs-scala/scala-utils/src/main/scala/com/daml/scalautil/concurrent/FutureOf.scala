@@ -6,8 +6,16 @@ package com.daml.scalautil.concurrent
 import scala.language.{higherKinds, implicitConversions}
 import scala.{concurrent => sc}
 import scala.util.Try
-
-import scalaz.{Catchable, Cobind, Isomorphism, Leibniz, MonadError, Nondeterminism, Semigroup}
+import scalaz.{
+  Catchable,
+  Cobind,
+  Functor,
+  Isomorphism,
+  Leibniz,
+  MonadError,
+  Nondeterminism,
+  Semigroup
+}
 import Isomorphism.<~>
 import Leibniz.===
 import scalaz.std.scalaFuture._
@@ -68,6 +76,12 @@ object FutureOf {
 
     def filter(p: A => Boolean)(implicit ec: ExecutionContext[EC]): Future[EC, A] =
       self.removeExecutionContext filter p
+
+    def andThen[U](pf: Try[T] PartialFunction U)(implicit ec: ExecutionContext[EC]): Future[EC, A] =
+      self.removeExecutionContext andThen p
+
+    def onComplete[U](pf: Try[T] => U)(implicit ec: ExecutionContext[EC]): Future[EC, A] =
+      self.removeExecutionContext onComplete p
   }
 
   /** Operations that don't refer to an ExecutionContext. */
